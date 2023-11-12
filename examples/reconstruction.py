@@ -250,6 +250,7 @@ class ModelNet40Dataset(torch.utils.data.Dataset):
 
         # Get coords
         xyz = xyz * self.resolution
+        # xyz = xyz / 0.01
         coords, inds = ME.utils.sparse_quantize(xyz, return_index=True)
 
         return (coords, xyz[inds], idx)
@@ -557,11 +558,11 @@ def train(net, dataloader, device, config):
     net.train()
     train_iter = iter(dataloader)
     # val_iter = iter(val_dataloader)
-    logging.info(f"LR: {scheduler.get_lr()}")
+    logging.info(f"LR: {scheduler.get_last_lr()}")
     for i in range(config.max_iter):
 
         s = time()
-        data_dict = train_iter.next()
+        data_dict = train_iter._next_data()
         d = time() - s
 
         optimizer.zero_grad()
@@ -614,7 +615,7 @@ def train(net, dataloader, device, config):
             )
 
             scheduler.step()
-            logging.info(f"LR: {scheduler.get_lr()}")
+            logging.info(f"LR: {scheduler.get_last_lr()}")
 
             net.train()
 
